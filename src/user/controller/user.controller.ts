@@ -1,10 +1,14 @@
 import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
-import { UserRole } from '../models/user.interface';
+import { AuthService } from 'src/auth/service/auth.service';
 import { UserService } from '../service/user.service';
+import * as bcrypt from 'bcrypt';
 
 @Controller('user')
 export class UserController {
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private authService: AuthService,
+  ) {}
 
   @Post('signup')
   async signup(
@@ -12,7 +16,6 @@ export class UserController {
     @Body('username') username: string,
     @Body('email') email: string,
     @Body('password') password: string,
-    @Body('role') _role: string,
   ) {
     try {
       if (name === undefined) {
@@ -36,18 +39,49 @@ export class UserController {
         throw new BadRequestException('Email al ready user');
       }
 
+      const hashedPassword = await bcrypt.hash(password, 12);
+
       const createUser = await this.userService.create({
         name,
         username,
         email,
-        password,
-        role: UserRole.USER,
+        password: hashedPassword,
       });
 
       delete createUser.password;
       delete createUser.role;
 
       return { createUser };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Post('signin')
+  async signin(
+    @Body('email') email: string,
+    @Body('password') password: string,
+  ) {
+    try {
+      if (!email || !password) {
+        throw new BadRequestException('Email and Password required');
+      }
+
+      const findUser = await this.userService.findOne({ email });
+
+      if (!findUser) {
+        throw new BadRequestException('Email not register');
+      }
+
+      if (
+        !(await this.authService.comparePassword(password, findUser.password))
+      ) {
+        throw new BadRequestException('password is wrong');
+      }
+
+      const token = await this.authService.generateJWT(findUser);
+
+      return { token };
     } catch (error) {
       throw error;
     }
