@@ -9,7 +9,6 @@ import {
   Param,
   Post,
   Put,
-  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -19,7 +18,6 @@ import { ParticipantService } from 'src/participant/service/participant.service'
 import { Seminar } from '../models/seminar.interface';
 import { SeminarService } from '../service/seminar.service';
 import * as moment from 'moment';
-import { Pagination } from 'nestjs-typeorm-paginate';
 
 @Controller('seminar')
 export class SeminarController {
@@ -38,32 +36,6 @@ export class SeminarController {
     @Request() req,
   ) {
     try {
-      const dates = new Date();
-      const momentDates = moment(
-        new Date(
-          dates.getFullYear(),
-          dates.getMonth(),
-          dates.getDate(),
-          dates.getHours(),
-          dates.getMinutes(),
-        ),
-      );
-
-      const today = momentDates.format('YYYY-MM-DD');
-      const currentTime = momentDates.format('hh:mm:ss');
-
-      if (date < today) {
-        throw new BadRequestException(
-          'You cannot create Seminar with date has already pass',
-        );
-      }
-
-      if (date == today && time < currentTime) {
-        throw new BadRequestException(
-          'You cannot create Seminar with time has already pass',
-        );
-      }
-
       if (quota < 10 || quota > 50) {
         throw new BadRequestException(
           'Quota for seminar minimum 10 and maximum 50',
@@ -118,25 +90,6 @@ export class SeminarController {
       const seminar = await this.seminarService.findOne(id);
 
       return seminar;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  @Get()
-  @UseGuards(JwtAuthGuard)
-  async index(
-    @Query('page') page = 1,
-    @Query('limit') limit = 15,
-  ): Promise<Pagination<Seminar>> {
-    try {
-      limit = limit > 15 ? 15 : limit;
-      const data = await this.seminarService.paginate({
-        page: Number(page),
-        limit: Number(limit),
-        route: 'https://seminar-adala.herokuapp.com/seminar',
-      });
-      return data;
     } catch (error) {
       throw error;
     }

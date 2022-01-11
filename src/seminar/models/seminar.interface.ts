@@ -5,6 +5,4 @@ export interface Seminar {
   time?: string;
   quota?: number;
   status?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
 }

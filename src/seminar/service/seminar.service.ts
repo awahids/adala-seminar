@@ -1,10 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  IPaginationOptions,
-  paginate,
-  Pagination,
-} from 'nestjs-typeorm-paginate';
 import { ParticipantEntity } from 'src/participant/models/participant.entity';
 import { Repository } from 'typeorm';
 import { SeminarEntity } from '../models/seminar.entity';
@@ -29,10 +24,6 @@ export class SeminarService {
 
   async findAll(): Promise<Seminar[]> {
     return this.seminarRepository.find();
-  }
-
-  async paginate(options: IPaginationOptions): Promise<Pagination<Seminar>> {
-    return paginate<Seminar>(this.seminarRepository, options);
   }
 
   async deleteOne(id: number): Promise<any> {
