@@ -5,6 +5,7 @@ import {
   NotFoundException,
   Post,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-guard';
 import { SeminarService } from 'src/seminar/service/seminar.service';
